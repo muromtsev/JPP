@@ -4,22 +4,19 @@ import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
 
-    private Transaction transaction;
-
     @Override
     public void createUsersTable() {
 
         try (Session session = Util.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
+            session.beginTransaction();
 
-            session.createSQLQuery("CREATE TABLE  if not exists user (\n" +
+            session.createSQLQuery("CREATE TABLE  if not exists users (\n" +
                     "  `id` BIGINT NOT NULL AUTO_INCREMENT,\n" +
                     "  `name` VARCHAR(15) NOT NULL,\n" +
                     "  `lastName` VARCHAR(45) NOT NULL,\n" +
@@ -30,9 +27,6 @@ public class UserDaoHibernateImpl implements UserDao {
             session.getTransaction().commit();
 
         } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
             e.printStackTrace();
         }
 
@@ -41,14 +35,11 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void dropUsersTable() {
         try (Session session = Util.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.createSQLQuery("DROP TABLE if exists user").executeUpdate();
+            session.beginTransaction();
+            session.createSQLQuery("DROP TABLE if exists users").executeUpdate();
             session.getTransaction().commit();
 
-        } catch (HibernateException e) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
+        } catch (HibernateException e) {//
             e.printStackTrace();
         }
     }
@@ -66,57 +57,43 @@ public class UserDaoHibernateImpl implements UserDao {
             session.getTransaction().commit();
 
         } catch (HibernateException e) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
             e.printStackTrace();
         }
-
-
     }
 
     @Override
     public void removeUserById(long id) {
         try (Session session = Util.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
+            session.beginTransaction();
             User user = session.get(User.class, id);
             session.delete(user);
             session.getTransaction().commit();
         } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
             e.printStackTrace();
         }
     }
 
     @Override
     public List<User> getAllUsers() {
-        List list = new ArrayList<>();
+        List<User> user = new ArrayList<>();
 
         try (Session session = Util.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            list = session.createQuery("from User").list();
+            session.beginTransaction();
+            user = session.createQuery("from User").list();
             session.getTransaction().commit();
         } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
             e.printStackTrace();
         }
-        return list;
+        return user;
     }
 
     @Override
     public void cleanUsersTable() {
         try (Session session = Util.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            session.createSQLQuery("DROP TABLE if exists user").executeUpdate();
+            session.beginTransaction();
+            session.createSQLQuery("TRUNCATE TABLE users").executeUpdate();
             session.getTransaction().commit();
         } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
             e.printStackTrace();
         }
     }
