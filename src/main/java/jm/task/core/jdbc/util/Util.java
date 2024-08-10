@@ -1,7 +1,7 @@
 package jm.task.core.jdbc.util;
 
 import jm.task.core.jdbc.model.User;
-import org.hibernate.Session;
+import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -15,13 +15,19 @@ public class Util {
     private static final String USERNAME_KEY = "db.username";
     private static final String PASSWORD_KEY = "db.password";
     private static final String URL_KEY = "db.url";
+    private static SessionFactory sessionFactory;
 
-    public Session getConnection() {
+
+    public static SessionFactory getSessionFactory() {
         Configuration cfg = new Configuration().addAnnotatedClass(User.class);
-
-        try (SessionFactory sessionFactory = cfg.buildSessionFactory()) {
-            return sessionFactory.getCurrentSession();
+        if (sessionFactory == null) {
+            try {
+                sessionFactory = cfg.buildSessionFactory();
+            } catch (HibernateException e) {
+                throw new RuntimeException(e);
+            }
         }
+        return sessionFactory;
     }
 
 
